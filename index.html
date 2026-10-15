@@ -32,6 +32,7 @@
                 <div v-if="studentState.status === 'connecting'" class="py-10">
                     <i class="fas fa-spinner fa-spin text-5xl text-indigo-500 mb-4"></i>
                     <p class="font-bold text-gray-600 text-base">Đang kết nối vào phòng học của cô...</p>
+                    <p class="text-xs text-gray-400 mt-2">Vui lòng chờ (tối đa 30 giây)...</p>
                 </div>
 
                 <div v-if="studentState.status === 'ready'">
@@ -95,11 +96,11 @@
                 <div v-if="studentState.status === 'error'" class="py-8 animate-fade-in">
                     <i class="fas fa-unlink text-6xl text-rose-500 mb-3"></i>
                     <h3 class="text-xl font-bold text-rose-600 mb-2">Mất kết nối với máy cô!</h3>
-                    <p class="text-gray-600 text-sm mb-4">Phòng học có thể đã đóng hoặc mạng bị lỗi.</p>
-                    <button @click="connectToTeacherRoom" class="bg-indigo-600 text-white font-bold py-2 px-6 rounded-full text-sm">Thử kết nối lại</button>
+                    <p class="text-gray-600 text-sm mb-4">Phòng học có thể đã đóng hoặc mạng Wi-Fi bị lỗi/chặn tín hiệu.</p>
+                    <button @click="connectToTeacherRoom" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full text-base shadow-md transition transform hover:scale-105">Thử kết nối lại</button>
                 </div>
             </div>
-            <p class="text-indigo-200 mt-4 text-xs font-medium">Hệ thống nộp bài trực tuyến - THPT Nguyễn Sinh Sắc</p>
+            <p class="text-indigo-200 mt-4 text-xs font-medium text-center px-4">Nếu thử lại vẫn báo lỗi, em hãy thử tắt Wi-Fi và dùng 4G nhé.</p>
         </div>
 
         <!-- ========================================== -->
@@ -407,7 +408,7 @@
                 </div>
             </div>
 
-            <!-- TAB 3: TỔNG KẾT TUẦN (ĐÃ TÍCH HỢP TÍNH NĂNG SỬA/XOÁ ĐÁNH GIÁ) -->
+            <!-- TAB 3: TỔNG KẾT TUẦN -->
             <div v-show="activeTab === 'summary'" class="bg-white rounded-xl shadow-sm p-6 animate-fade-in">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 mb-6 gap-3">
                     <h2 class="text-2xl font-bold text-gray-800"><i class="fas fa-chart-line text-blue-600 mr-2"></i>Tổng Kết & Xuất Báo Cáo</h2>
@@ -449,7 +450,7 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
-                            <tr v-for="(summary, index) in filteredSummaries" :key="summary.student" class="hover:bg-blue-50 transition">
+                            <tr v-for="(summary, index) in filteredSummaries" :key="summary.student" class="hover:bg-blue-50 transition group">
                                 <td class="py-3 px-2 text-center font-bold text-gray-500">{{ index + 1 }}</td>
                                 <td class="py-3 px-4 font-bold text-gray-800">{{ summary.student }}</td>
                                 <td class="py-3 px-2 text-center font-semibold">{{ summary.className }}</td>
@@ -458,7 +459,6 @@
                                 <td class="py-3 px-2 text-center"><span :class="{'text-emerald-600': summary.netScore > 0, 'text-rose-600': summary.netScore < 0, 'text-gray-500': summary.netScore === 0}" class="font-black text-lg">{{ summary.netScore > 0 ? '+' : ''}}{{ summary.netScore }}</span></td>
                                 <td class="py-3 px-4">
                                     <div class="space-y-2 text-xs">
-                                        <!-- HIỂN THỊ CHI TIẾT VÀ NÚT SỬA / XÓA -->
                                         <div v-for="record in summary.records" :key="record.id" class="bg-gray-50 hover:bg-white p-2 rounded border border-gray-200 hover:border-blue-300 hover:shadow-sm transition relative group">
                                             <div class="font-bold text-gray-700 flex justify-between items-start">
                                                 <div class="flex-1 pr-16">
@@ -467,14 +467,9 @@
                                                     <span v-if="record.minusTicks > 0" class="text-rose-600 ml-1 inline-block bg-rose-100 px-1 rounded">(-{{ record.minusTicks }})</span>
                                                 </div>
                                                 
-                                                <!-- Nút Sửa / Xoá (Ẩn hiện khi hover) -->
                                                 <div class="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition flex space-x-1">
-                                                    <button @click="openEditModal(record)" class="bg-blue-100 text-blue-600 hover:bg-blue-600 hover:text-white p-1.5 rounded transition" title="Sửa đánh giá này">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                    <button @click="deleteRecord(record.id)" class="bg-rose-100 text-rose-600 hover:bg-rose-600 hover:text-white p-1.5 rounded transition" title="Xóa đánh giá này">
-                                                        <i class="fas fa-trash-alt"></i>
-                                                    </button>
+                                                    <button @click="openEditModal(record)" class="bg-blue-100 text-blue-600 hover:bg-blue-600 hover:text-white p-1.5 rounded transition" title="Sửa đánh giá này"><i class="fas fa-edit"></i></button>
+                                                    <button @click="deleteRecord(record.id)" class="bg-rose-100 text-rose-600 hover:bg-rose-600 hover:text-white p-1.5 rounded transition" title="Xóa đánh giá này"><i class="fas fa-trash-alt"></i></button>
                                                 </div>
                                             </div>
                                             <div v-if="record.comment" class="italic text-gray-600 mt-1 border-l-2 border-blue-300 pl-2 pr-8">"{{ record.comment }}"</div>
@@ -517,7 +512,7 @@
                 </div>
             </div>
 
-            <!-- MODAL CHỈNH SỬA BẢN GHI ĐÁNH GIÁ (MỚI) -->
+            <!-- MODAL CHỈNH SỬA BẢN GHI ĐÁNH GIÁ -->
             <div v-if="showEditModal" class="fixed inset-0 bg-slate-900 bg-opacity-70 z-50 flex items-center justify-center p-4 animate-fade-in">
                 <div class="bg-white rounded-2xl shadow-2xl overflow-hidden relative w-full max-w-2xl max-h-[90vh] flex flex-col">
                     <div class="bg-blue-600 p-4 text-white flex justify-between items-center shrink-0">
@@ -526,7 +521,6 @@
                     </div>
                     
                     <div class="p-6 overflow-y-auto flex-1">
-                        <!-- Info -->
                         <div class="mb-4 bg-blue-50 p-3 rounded-lg border border-blue-100 flex items-center">
                             <i class="fas fa-user-graduate text-3xl text-blue-400 mr-4"></i>
                             <div>
@@ -535,7 +529,6 @@
                             </div>
                         </div>
 
-                        <!-- Date/Week/Semester -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
                             <div>
                                 <label class="block font-bold text-sm mb-1 text-gray-700">Ngày học</label>
@@ -556,7 +549,6 @@
                             </div>
                         </div>
 
-                        <!-- Checkboxes -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
                             <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-200">
                                 <h4 class="font-bold text-emerald-800 text-sm mb-3 border-b border-emerald-200 pb-1"><i class="fas fa-plus-circle mr-1"></i> TIÊU CHÍ CỘNG ĐIỂM</h4>
@@ -572,7 +564,6 @@
                             </div>
                         </div>
 
-                        <!-- Comment -->
                         <div>
                             <label class="block font-bold text-sm mb-1 text-gray-700">Nhận xét tổng kết thêm</label>
                             <textarea v-model="editingRecord.comment" rows="3" class="w-full border-2 border-gray-200 rounded-lg p-3 focus:border-blue-500 outline-none text-gray-700"></textarea>
@@ -646,8 +637,6 @@
                 const activeTab = ref('entry');
                 const isSidebarOpen = ref(false);
                 const showSyncModal = ref(false);
-                
-                // --- THÊM BIẾN QUẢN LÝ MODAL CHỈNH SỬA ---
                 const showEditModal = ref(false);
                 const editingRecord = ref(null);
 
@@ -721,7 +710,7 @@
 
                 const dbQuestions = {
                     10: {
-                        "Unit 1": [ {q: "Fill in: My mother is a h_____ and she does all the chores.", a: "homemaker"}, {q: "Fill in: We divide household chores e_____. Everyone does their share.", a: "equally"}, {q: "Multiple choice: I usually _____ the washing-up after dinner. (A. make / B. do / C. take)", a: "do"}, {q: "Grammar: He (play) _____ football at the moment.", a: "is playing"}, {q: "Grammar: Water (boil) _____ at 100 degrees Celsius.", a: "boils"}, {q: "Reorder: heavy / My / does / lifting / father / the / always.", a: "My father always does the heavy lifting."}, {q: "Find error: She is always wash the dishes in the evening.", a: "wash"}, {q: "Fill in: Doing chores helps children learn life s____.", a: "skills"}, {q: "Translate to English: Trách nhiệm gia đình.", a: "family responsibility"}, {q: "Multiple choice: My sister is responsible _____ cooking. (A. of / B. for / C. at)", a: "for"} ],
+                        "Unit 1": [ {q: "Fill in: My mother is a h_____ and she does all the chores.", a: "homemaker"}, {q: "Fill in: We divide household chores e_____. Everyone does share.", a: "equally"}, {q: "Multiple choice: I usually _____ the washing-up after dinner. (A. make / B. do / C. take)", a: "do"}, {q: "Grammar: He (play) _____ football at the moment.", a: "is playing"}, {q: "Grammar: Water (boil) _____ at 100 degrees Celsius.", a: "boils"}, {q: "Reorder: heavy / My / does / lifting / father / the / always.", a: "My father always does the heavy lifting."}, {q: "Find error: She is always wash the dishes in the evening.", a: "wash"}, {q: "Fill in: Doing chores helps children learn life s____.", a: "skills"}, {q: "Translate to English: Trách nhiệm gia đình.", a: "family responsibility"}, {q: "Multiple choice: My sister is responsible _____ cooking. (A. of / B. for / C. at)", a: "for"} ],
                         "Unit 2": [ {q: "Fill in: We should adopt a g_____ lifestyle to save the planet.", a: "green"}, {q: "Fill in: Reducing your carbon f_____ is essential.", a: "footprint"}, {q: "Multiple choice: Please _____ off the lights. (A. put / B. take / C. turn)", a: "turn"}, {q: "Grammar (Passive): People plant many trees. -> Many trees _____.", a: "are planted"}, {q: "Fill in: We should use e___-friendly products.", a: "eco"}, {q: "Reorder: pollution / environment / Plastic / the / damages.", a: "Plastic pollution damages the environment."}, {q: "Find error: The room is clean by my sister every day.", a: "clean"}, {q: "Multiple choice: We should sort our daily _____. (A. litter / B. awareness / C. issue)", a: "litter"}, {q: "Fill in: Public transport helps reduce gas e_____.", a: "emissions"}, {q: "Fill in: You should _____ away from single-use plastics. (stay/keep/move)", a: "stay"}, {q: "Grammar (Passive): They built this house in 1990. -> This house _____ in 1990.", a: "was built"}, {q: "Multiple choice: Air pollution causes many _____ problems. (A. health / B. healthy / C. heal)", a: "health"}, {q: "Fill in: Solar energy is a type of r_____ energy.", a: "renewable"}, {q: "Translate to English: Năng lượng gió.", a: "wind energy"}, {q: "Reorder: plastic / Use / bags / less / please.", a: "Use less plastic bags please."}, {q: "Find error: The trees was planted yesterday.", a: "was"}, {q: "Fill in: Water p_____ is a serious issue in this river.", a: "pollution"}, {q: "Multiple choice: Deforestation leads _____ global warming. (A. to / B. at / C. from)", a: "to"}, {q: "Grammar (Passive): They are painting the school. -> The school _____.", a: "is being painted"}, {q: "Fill in: We need to raise people's a_____ of saving the environment.", a: "awareness"} ],
                         "Unit 3 & Review 1": [ {q: "Fill in: He plays the piano very b_____.", a: "beautifully"}, {q: "Grammar: We let him _____ (go) out.", a: "go"}, {q: "Multiple choice: She decided _____ (A. taking / B. to take) the job.", a: "to take"}, {q: "Reorder: pop / listening / I / to / love / music.", a: "I love listening to pop music."}, {q: "Fill in: Son Tung M-TP is a famous p___ singer.", a: "pop"} ],
                         "Unit 4": [ {q: "Fill in: We are looking for v_____ for the summer camp.", a: "volunteers"}, {q: "Multiple choice: The movie was very _____. (A. bored / B. boring)", a: "boring"}, {q: "Grammar: I am (interest) _____ in community service.", a: "interested"}, {q: "Reorder: community / We / local / our / help / should.", a: "We should help our local community."}, {q: "Fill in: Donating blood is a m_____ activity.", a: "meaningful"} ]
@@ -827,7 +816,7 @@
 
                 const connectToTeacherRoom = () => {
                     studentState.value.status = 'connecting';
-                    const connectionTimeout = setTimeout(() => { if(studentState.value.status === 'connecting') { studentState.value.status = 'error'; } }, 5000);
+                    const connectionTimeout = setTimeout(() => { if(studentState.value.status === 'connecting') { studentState.value.status = 'error'; } }, 30000);
                     const peer = new Peer({ config: { 'iceServers': [ { url: 'stun:stun.l.google.com:19302' }, { url: 'stun:stun1.l.google.com:19302' } ] } });
                     peer.on('open', () => {
                         studentConn = peer.connect(studentState.value.room);
@@ -945,33 +934,23 @@
                     form.value.criteriaPlus = { phatBieu: false, lamBaiTap: false, nhanXetDung: false, traLoiDung: false }; form.value.criteriaMinus = { khongLamBai: false, khongChuY: false }; form.value.comment = '';
                 };
 
-                // --- HÀM CHO TÍNH NĂNG SỬA & XOÁ ĐÁNH GIÁ (MỚI) ---
                 const openEditModal = (record) => {
-                    // Cần deep clone để tránh sửa trực tiếp vào state khi chưa bấm lưu
                     editingRecord.value = JSON.parse(JSON.stringify(record));
-                    // Xử lý logic an toàn đối với các record cũ chưa có tiêu chí
                     if (!editingRecord.value.criteriaPlus) editingRecord.value.criteriaPlus = { phatBieu: false, lamBaiTap: false, nhanXetDung: false, traLoiDung: false };
                     if (!editingRecord.value.criteriaMinus) editingRecord.value.criteriaMinus = { khongLamBai: false, khongChuY: false };
-                    
                     showEditModal.value = true;
                 };
 
                 const saveEditRecord = () => {
                     const index = records.value.findIndex(r => r.id === editingRecord.value.id);
                     if (index !== -1) {
-                        // Cập nhật lại số điểm cộng / trừ dựa trên thay đổi của tiêu chí
                         let plus = Object.values(editingRecord.value.criteriaPlus).filter(v => v === true).length;
                         let minus = Object.values(editingRecord.value.criteriaMinus).filter(v => v === true).length;
-                        
                         editingRecord.value.plusTicks = plus;
                         editingRecord.value.minusTicks = minus;
-
-                        // Đồng bộ lại học kỳ và tuần theo ngày học (nếu có đổi ngày)
                         const weekNum = getWeekFromDate(editingRecord.value.date);
                         editingRecord.value.week = `Tuần ${weekNum}`;
                         editingRecord.value.semester = weekNum <= 18 ? 'Học kỳ 1' : 'Học kỳ 2';
-
-                        // Ghi đè vào data gốc
                         records.value[index] = editingRecord.value;
                         showToast("Đã cập nhật đánh giá thành công!");
                     }
@@ -984,7 +963,6 @@
                         showToast("Đã xóa đánh giá thành công!");
                     }
                 };
-                // ----------------------------------------------------
 
                 const filteredSummaries = computed(() => {
                     let filtered = records.value.filter(r => {
@@ -1004,12 +982,7 @@
                         summaryMap[key].records.push(record);
                         if (record.id > summaryMap[key].latestUpdate) summaryMap[key].latestUpdate = record.id;
                     });
-                    
-                    // Sắp xếp các record bên trong từng học sinh theo thời gian giảm dần
-                    Object.values(summaryMap).forEach(s => {
-                        s.records.sort((a, b) => b.id - a.id);
-                    });
-
+                    Object.values(summaryMap).forEach(s => { s.records.sort((a, b) => b.id - a.id); });
                     return Object.values(summaryMap).sort((a, b) => b.latestUpdate - a.latestUpdate);
                 });
 
@@ -1093,7 +1066,6 @@
                     isStudentDevice, studentState, sendAnswerFromPhone, connectToTeacherRoom, isLocalFile,
                     suggestedQuestions, currentGrade, currentUnitStr, selectSuggestedQuestion,
                     commentSuggestions, addSuggestion, showSyncModal, exportBackup, importBackup,
-                    // Variables and methods for Edit/Delete feature
                     showEditModal, editingRecord, openEditModal, saveEditRecord, deleteRecord
                 };
             }
