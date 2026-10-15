@@ -32,11 +32,10 @@
                 <div v-if="studentState.status === 'connecting'" class="py-10">
                     <i class="fas fa-spinner fa-spin text-5xl text-indigo-500 mb-4"></i>
                     <p class="font-bold text-gray-600 text-base">Đang kết nối vào phòng học của cô...</p>
-                    <p class="text-xs text-gray-400 mt-2 font-medium">Vui lòng chờ (tối đa 90 giây)...</p>
+                    <p class="text-xs text-gray-400 mt-2 font-medium">Vui lòng chờ (tối đa 15 giây)...</p>
                 </div>
 
                 <div v-if="studentState.status === 'ready'">
-                    <!-- ĐỒNG HỒ ĐẾM NGƯỢC HỌC SINH -->
                     <div class="bg-indigo-800 text-white font-mono text-3xl font-black py-3 px-8 rounded-full inline-flex items-center mb-6 shadow-[inset_0px_2px_4px_rgba(0,0,0,0.4)] border-2 border-indigo-400">
                         <i class="fas fa-clock mr-3 text-yellow-400 animate-pulse"></i> {{ formatTime(studentState.timeLeft) }}
                     </div>
@@ -101,7 +100,7 @@
                 <div v-if="studentState.status === 'error'" class="py-8 animate-fade-in">
                     <i class="fas fa-unlink text-6xl text-rose-500 mb-3"></i>
                     <h3 class="text-xl font-bold text-rose-600 mb-2">Mất kết nối với máy cô!</h3>
-                    <p class="text-gray-600 text-sm mb-4">Phòng học có thể đã đóng hoặc mạng Wi-Fi bị lỗi/chặn tín hiệu.</p>
+                    <p class="text-gray-600 text-sm mb-4">Phòng học có thể đã đóng hoặc mạng bị lỗi/chặn tín hiệu.</p>
                     <button @click="connectToTeacherRoom" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full text-base shadow-md transition transform hover:scale-105">Thử kết nối lại</button>
                 </div>
             </div>
@@ -114,7 +113,6 @@
         <div v-else>
             <!-- Header -->
             <div class="bg-white rounded-xl shadow-sm p-6 mb-6 text-center border-t-4 border-blue-600 relative">
-                
                 <button @click="showSyncModal = true" class="absolute top-4 right-4 md:top-6 md:right-6 flex items-center justify-center text-blue-500 hover:text-white bg-blue-50 hover:bg-blue-600 w-12 h-12 md:w-14 md:h-14 rounded-full transition shadow-sm border border-blue-200 z-10" title="Sao lưu và Đồng bộ dữ liệu">
                     <i class="fas fa-cloud-upload-alt text-xl md:text-2xl"></i>
                 </button>
@@ -191,6 +189,7 @@
                     </div>
                 </div>
 
+                <!-- Cảnh báo số lượt đánh giá -->
                 <div v-if="form.student" class="mb-6 animate-fade-in">
                     <div :class="todayRecordsCount > 0 ? 'bg-yellow-50 border-yellow-400 text-yellow-800' : 'bg-emerald-50 border-emerald-400 text-emerald-800'" class="border-l-4 p-4 rounded-lg shadow-sm">
                         <div class="flex items-start">
@@ -245,13 +244,15 @@
                 <button @click="saveRecord" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg py-4 px-4 rounded-xl shadow-lg transition transform hover:-translate-y-1"><i class="fas fa-save mr-2"></i> LƯU ĐÁNH GIÁ HỌC TẬP</button>
             </div>
 
-            <!-- TAB 2: NỘP BÀI ĐIỆN THOẠI (KÈM NGÂN HÀNG CÂU HỎI VÀ ĐỒNG HỒ ĐẾM NGƯỢC) -->
+            <!-- TAB 2: NỘP BÀI ĐIỆN THOẠI (KÈM NGÂN HÀNG CÂU HỎI VÀ TÍNH NĂNG CHỐT TOP) -->
             <div v-show="activeTab === 'liveQuiz'" class="bg-white rounded-xl shadow-sm p-6 animate-fade-in border-t-4 border-purple-500">
                 <div class="flex items-center justify-between border-b pb-3 mb-5">
                     <h2 class="text-2xl font-bold text-purple-800"><i class="fas fa-network-wired mr-2"></i>Tổ Chức Bài Tập Trực Tuyến (Cả Lớp Nộp Cùng Lúc)</h2>
                 </div>
 
+                <!-- CHƯA MỞ PHÒNG -->
                 <div v-if="!liveSession.isOpen">
+                    <!-- KHU VỰC NGÂN HÀNG CÂU HỎI -->
                     <div class="bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-xl p-4 mb-6 shadow-sm">
                         <div class="flex flex-wrap justify-between items-center mb-3">
                             <h3 class="font-black text-indigo-900 text-lg"><i class="fas fa-lightbulb text-yellow-500 mr-2 text-xl"></i> Ngân Hàng Câu Hỏi Gợi Ý (Theo Tuần)</h3>
@@ -260,7 +261,6 @@
                                 <span v-if="currentGrade" class="bg-indigo-600 text-white font-bold px-3 py-1 rounded shadow-sm text-sm"><i class="fas fa-book mr-1"></i> Global Success {{ currentGrade }} - {{ currentUnitStr }}</span>
                             </div>
                         </div>
-
                         <div v-if="!liveSession.class" class="text-gray-500 italic bg-white p-3 rounded border text-center">
                             <i class="fas fa-arrow-down mr-1"></i> Cô vui lòng <strong>Chọn Lớp</strong> ở phía dưới để hệ thống hiển thị ngân hàng câu hỏi bám sát khối lớp nhé!
                         </div>
@@ -272,17 +272,14 @@
                                         <p class="font-bold text-gray-800 mb-1 leading-relaxed"><span class="text-indigo-500 mr-1">{{ idx + 1 }}.</span> {{ item.q }}</p>
                                         <p class="text-emerald-700 font-mono font-bold text-xs bg-emerald-50 inline-block px-2 py-1 rounded border border-emerald-100">Đáp án chuẩn: {{ item.a }}</p>
                                     </div>
-                                    <button @click="selectSuggestedQuestion(item)" class="shrink-0 w-full md:w-auto bg-indigo-100 hover:bg-indigo-600 text-indigo-700 hover:text-white px-4 py-2 rounded font-bold transition">
-                                        <i class="fas fa-check mr-1"></i> Chọn Câu Này
-                                    </button>
+                                    <button @click="selectSuggestedQuestion(item)" class="shrink-0 w-full md:w-auto bg-indigo-100 hover:bg-indigo-600 text-indigo-700 hover:text-white px-4 py-2 rounded font-bold transition"><i class="fas fa-check mr-1"></i> Chọn Câu Này</button>
                                 </div>
-                                <div v-if="suggestedQuestions.length === 0" class="text-center p-4 bg-white rounded border text-gray-500">
-                                    Không có dữ liệu gợi ý cho Tuần này. Cô có thể tự nhập câu hỏi ở form bên dưới.
-                                </div>
+                                <div v-if="suggestedQuestions.length === 0" class="text-center p-4 bg-white rounded border text-gray-500">Không có dữ liệu gợi ý cho Tuần này. Cô có thể tự nhập câu hỏi ở form bên dưới.</div>
                             </div>
                         </div>
                     </div>
 
+                    <!-- FORM CẤU HÌNH PHÒNG -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div class="bg-gray-50 p-5 rounded-xl border flex flex-col justify-between">
                             <div>
@@ -300,7 +297,6 @@
                                 <p class="text-xs text-amber-600 mt-2 font-semibold italic">Phòng thi diễn ra trong <strong>90 giây</strong>. Ngay khi có đủ {{ liveSession.targetCorrectAnswers }} em trả lời đúng, phòng sẽ lập tức chốt sổ.</p>
                             </div>
                         </div>
-
                         <div class="bg-gray-50 p-5 rounded-xl border">
                             <label class="block font-bold mb-2 text-gray-700">3. Nội dung Câu hỏi / Bài tập (Trình chiếu lên bảng):</label>
                             <textarea v-model="liveSession.question" rows="4" placeholder="Cô có thể chọn câu hỏi từ Ngân hàng gợi ý ở trên hoặc tự gõ câu hỏi vào đây..." class="w-full border-2 border-indigo-300 rounded-lg p-3 bg-indigo-50 focus:border-indigo-500 focus:outline-none text-base font-medium shadow-inner text-indigo-900 mb-4"></textarea>
@@ -315,7 +311,9 @@
                     </button>
                 </div>
 
+                <!-- ĐANG MỞ PHÒNG -->
                 <div v-else class="animate-fade-in">
+                    <!-- Thanh trạng thái phòng -->
                     <div :class="liveSession.isFinished ? 'bg-amber-600' : 'bg-indigo-900'" class="flex flex-col md:flex-row justify-between items-center text-white p-5 rounded-2xl mb-6 shadow-lg gap-4 transition-colors duration-500">
                         <div class="flex-1">
                             <span v-if="!liveSession.isFinished" class="bg-emerald-500 text-white text-xs font-black uppercase px-3 py-1 rounded-full animate-pulse mr-2">● ĐANG NHẬN BÀI</span>
@@ -327,7 +325,6 @@
                                 <span class="text-amber-200 font-bold text-base md:text-lg bg-black/20 px-3 py-1.5 rounded-lg border border-amber-500/30">
                                     <i class="fas fa-trophy mr-1"></i> Tiến độ mục tiêu: {{ liveCorrectCount }} / {{ liveSession.targetCorrectAnswers }} HS
                                 </span>
-                                
                                 <span v-if="!liveSession.isFinished" class="text-white bg-indigo-700 px-4 py-1.5 rounded-full text-base md:text-lg border border-indigo-500 shadow-inner flex items-center font-bold">
                                     <i class="fas fa-stopwatch mr-2 text-yellow-400 animate-pulse"></i> Thời gian còn lại: 
                                     <span class="font-mono text-xl ml-2 tracking-widest">{{ formatTime(liveSession.timeLeft) }}</span>
@@ -627,10 +624,16 @@
 
         createApp({
             setup() {
+                // ==========================================
+                // 1. NHẬN DIỆN THIẾT BỊ HỌC SINH / GIÁO VIÊN
+                // ==========================================
                 const isLocalFile = ref(window.location.protocol === 'file:');
                 const urlParams = new URLSearchParams(window.location.search);
                 const isStudentDevice = ref(urlParams.has('room'));
 
+                // ==========================================
+                // 2. BIẾN DÀNH CHO GIÁO VIÊN
+                // ==========================================
                 const activeTab = ref('entry');
                 const isSidebarOpen = ref(false);
                 const showSyncModal = ref(false);
@@ -753,7 +756,7 @@
                 };
 
                 // ==========================================
-                // LOGIC PEERJS: PHIÊN NỘP BÀI CẢ LỚP (CÓ ĐỒNG HỒ ĐẾM NGƯỢC 90s)
+                // 3. LOGIC PEERJS: PHIÊN NỘP BÀI CẢ LỚP (ĐỒNG HỒ ĐẾM NGƯỢC 90s)
                 // ==========================================
                 const liveSession = ref({ 
                     isOpen: false, 
@@ -763,7 +766,7 @@
                     targetCorrectAnswers: 5,
                     submissions: [],
                     isFinished: false,
-                    timeLeft: 90,        // Đồng hồ đếm ngược 90 giây
+                    timeLeft: 90,        
                     timerInterval: null
                 });
                 
@@ -778,7 +781,6 @@
                     teacherPeer.on('connection', conn => {
                         conn.on('data', data => {
                             if (data.type === 'GET_ROOM_INFO') {
-                                // Truyền thêm biến thời gian còn lại sang điện thoại học sinh
                                 conn.send({ 
                                     type: 'ROOM_INFO', 
                                     className: liveSession.value.class, 
@@ -798,22 +800,20 @@
                     liveSession.value.isOpen = true; 
                     liveSession.value.isFinished = false; 
                     liveSession.value.submissions = [];
-                    liveSession.value.timeLeft = 90; // Bắt đầu bằng 90 giây
+                    liveSession.value.timeLeft = 90;
                     
-                    // Kích hoạt đồng hồ đếm ngược ở phía Giáo viên
                     if(liveSession.value.timerInterval) clearInterval(liveSession.value.timerInterval);
                     liveSession.value.timerInterval = setInterval(() => {
                         if(liveSession.value.timeLeft > 0 && !liveSession.value.isFinished) {
                             liveSession.value.timeLeft--;
                             if(liveSession.value.timeLeft === 0) {
-                                liveSession.value.isFinished = true; // Hết giờ -> Chốt sổ
+                                liveSession.value.isFinished = true;
                             }
                         } else {
                             clearInterval(liveSession.value.timerInterval);
                         }
                     }, 1000);
 
-                    // Khởi tạo mạng
                     if (teacherPeer) { teacherPeer.destroy(); }
                     teacherPeer = new Peer({ config: { 'iceServers': [ { url: 'stun:stun.l.google.com:19302' }, { url: 'stun:stun1.l.google.com:19302' } ] } });
                     
@@ -858,7 +858,6 @@
                 const liveWrongCount = computed(() => liveSession.value.submissions.filter(s => !s.isCorrect).length);
 
                 const handleMultipleStudentAnswer = (conn, studentName, studentAns) => {
-                    // Nếu đã chốt sổ (Đủ slot hoặc Hết giờ 90s)
                     if (liveSession.value.isFinished || liveCorrectCount.value >= liveSession.value.targetCorrectAnswers || liveSession.value.timeLeft <= 0) {
                         conn.send({ type: 'RESULT', status: 'limit_reached' }); return;
                     }
@@ -890,7 +889,7 @@
                 };
 
                 // ==========================================
-                // LOGIC XỬ LÝ TRÊN ĐIỆN THOẠI HỌC SINH
+                // 4. LOGIC XỬ LÝ TRÊN ĐIỆN THOẠI HỌC SINH
                 // ==========================================
                 const studentState = ref({ 
                     room: urlParams.get('room'), 
@@ -908,7 +907,7 @@
 
                 const connectToTeacherRoom = () => {
                     studentState.value.status = 'connecting';
-                    const connectionTimeout = setTimeout(() => { if(studentState.value.status === 'connecting') { studentState.value.status = 'error'; } }, 90000); // 90s connection attempt
+                    const connectionTimeout = setTimeout(() => { if(studentState.value.status === 'connecting') { studentState.value.status = 'error'; } }, 15000); 
                     const peer = new Peer({ config: { 'iceServers': [ { url: 'stun:stun.l.google.com:19302' }, { url: 'stun:stun1.l.google.com:19302' } ] } });
                     
                     peer.on('open', () => {
@@ -924,14 +923,13 @@
                                     studentState.value.studentList = data.studentList; 
                                     studentState.value.status = 'ready'; 
                                     
-                                    // Bật đồng hồ đếm ngược trên điện thoại học sinh đồng bộ với máy giáo viên
                                     studentState.value.timeLeft = data.timeLeft;
                                     if(studentState.value.timerInterval) clearInterval(studentState.value.timerInterval);
                                     studentState.value.timerInterval = setInterval(() => {
                                         if(studentState.value.timeLeft > 0 && studentState.value.status === 'ready') {
                                             studentState.value.timeLeft--;
                                             if(studentState.value.timeLeft === 0) {
-                                                studentState.value.status = 'limit_reached'; // Hết giờ tự đóng
+                                                studentState.value.status = 'limit_reached';
                                             }
                                         } else {
                                             clearInterval(studentState.value.timerInterval);
@@ -959,6 +957,9 @@
                     studentConn.send({ type: 'SUBMIT_ANSWER', student: studentState.value.selectedStudent, answer: studentState.value.answer.trim() });
                 };
 
+                // ==========================================
+                // 5. CÁC HÀM CƠ BẢN CỦA GIÁO VIÊN
+                // ==========================================
                 let isUpdatingFromWatch = false;
                 watch(() => form.value.date, (newDate) => {
                     if (!newDate || isUpdatingFromWatch) return;
