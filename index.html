@@ -27,7 +27,7 @@
             <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden text-center p-6 md:p-8 relative">
                 <i class="fas fa-graduation-cap text-5xl text-indigo-600 mb-3"></i>
                 <h2 class="text-xl font-black text-gray-800 uppercase tracking-wide">THPT NGUYỄN SINH SẮC</h2>
-                <p class="text-xs font-bold text-indigo-600 mb-4 pb-2 border-b">BỘ MÔN TIẾNG ANH - CÔ NHI</p>
+              <p class="text-xs font-bold text-indigo-600 mb-4 pb-2 border-b">BỘ MÔN TIẾNG ANH - MS.NHI</p>
                 
                 <div v-if="studentState.status === 'connecting'" class="py-10">
                     <i class="fas fa-spinner fa-spin text-5xl text-indigo-500 mb-4"></i>
@@ -65,7 +65,7 @@
 
                 <div v-if="studentState.status === 'submitting'" class="py-10">
                     <i class="fas fa-paper-plane fa-bounce text-5xl text-indigo-500 mb-4"></i>
-                    <p class="font-bold text-gray-700 text-lg">Đang chuyển bài nộp về máy cô Nhi...</p>
+                    <p class="font-bold text-gray-700 text-lg">Đang chuyển bài nộp về máy Ms. Nhi...</p>
                 </div>
 
                 <div v-if="studentState.status === 'correct'" class="py-8 animate-fade-in">
@@ -94,7 +94,7 @@
                 <div v-if="studentState.status === 'limit_reached'" class="py-8 animate-fade-in">
                     <i class="fas fa-stopwatch text-6xl text-amber-500 mb-3"></i>
                     <h3 class="text-xl font-black text-amber-600 mb-2">ĐÃ CHỐT SỔ HOẶC HẾT GIỜ!</h3>
-                    <p class="text-gray-600 text-sm mb-4">Cô Nhi đã chốt danh sách hoặc thời gian làm bài đã kết thúc. Hẹn em ở câu hỏi tiếp theo nhé!</p>
+                    <p class="text-gray-600 text-sm mb-4">Ms. Nhi đã chốt danh sách hoặc thời gian làm bài đã kết thúc. Hẹn em ở câu hỏi tiếp theo nhé!</p>
                 </div>
 
                 <div v-if="studentState.status === 'error'" class="py-8 animate-fade-in">
@@ -335,8 +335,7 @@
 
                     <div class="border rounded-xl overflow-hidden shadow-sm">
                         <div class="bg-slate-800 text-white px-5 py-3 font-bold flex justify-between items-center">
-                            <span><i class="fas fa-list-check mr-2"></i> Bảng Vàng Sinh Viên (Thời gian thực)</span>
-                            <span class="text-sm font-normal text-gray-300">Đúng: <strong class="text-emerald-400">{{ liveCorrectCount }}</strong> | Sai: <strong class="text-rose-400">{{ liveWrongCount }}</strong></span>
+<span><i class="fas fa-list-check mr-2"></i> BẢNG GHI NHẬN THÀNH TÍCH (Thời gian thực)</span>                            <span class="text-sm font-normal text-gray-300">Đúng: <strong class="text-emerald-400">{{ liveCorrectCount }}</strong> | Sai: <strong class="text-rose-400">{{ liveWrongCount }}</strong></span>
                         </div>
                         <table class="min-w-full bg-white">
                             <thead class="bg-slate-100 text-gray-700 text-sm">
@@ -777,9 +776,45 @@
                         conn.send({ type: 'RESULT', status: 'already_submitted' }); return; 
                     }
 
-                    const ansStudentClean = studentAns.trim().toLowerCase();
-                    const ansTeacherClean = liveSession.value.correctAnswer.trim().toLowerCase();
-                    const isCorrect = (ansStudentClean === ansTeacherClean);
+                    // --- BẮT ĐẦU CẢI TIẾN LOGIC CHẤM ĐIỂM ---
+const isCorrectAnswer = (studentInput, teacherInput) => {
+    // Chuẩn hóa chuỗi: xóa khoảng trắng thừa, đưa về chữ thường
+    const cleanStr = str => str.trim().toLowerCase().replace(/\s+/g, ' ');
+    const sInput = cleanStr(studentInput);
+    
+    // Tách các đáp án đúng của GV (Hỗ trợ GV nhập: A | B hoặc A/B hoặc A;B)
+    const tInputs = teacherInput.split(/[/|;]/).map(cleanStr); 
+
+    for (let tInput of tInputs) {
+        if (sInput === tInput) return true; // Trúng khớp hoàn toàn 100%
+        
+        // Hàm phụ trợ bóc tách phần Chữ cái (A,B,C,D) và phần Nội dung chữ
+        const extractFormat = (str) => {
+            const match = str.match(/^([a-d])[\.\:\)]?\s*(.*)$/);
+            return match ? { letter: match[1], text: match[2] } : null;
+        };
+
+        const tParsed = extractFormat(tInput);
+        const sParsed = extractFormat(sInput);
+
+        if (tParsed) {
+            // Trường hợp 1: GV nhập đầy đủ "A. do"
+            if (sInput === tParsed.letter) return true; // HS chỉ nhập "A" -> ĐÚNG
+            if (tParsed.text && sInput === tParsed.text) return true; // HS chỉ nhập "do" -> ĐÚNG
+            if (sParsed && sParsed.letter === tParsed.letter) {
+                // HS nhập có chứa tiền tố "A." hoặc "A) "
+                if (!sParsed.text || sParsed.text === tParsed.text) return true; 
+            }
+        } else {
+            // Trường hợp 2: GV chỉ nhập nội dung "do"
+            if (sParsed && sParsed.text === tInput) return true; // HS lại nhập dư "A. do" -> Vẫn cho ĐÚNG
+        }
+    }
+    return false; // Nếu qua hết các kiểm tra mà không khớp -> SAI
+};
+
+const isCorrect = isCorrectAnswer(studentAns, liveSession.value.correctAnswer);
+// --- KẾT THÚC CẢI TIẾN LOGIC CHẤM ĐIỂM ---
                     const now = new Date();
                     const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
 
